@@ -1,0 +1,6 @@
+<svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="46" height="46" rx="12" fill="#0B1220" stroke="#1E293B"/>
+  <circle cx="24" cy="24" r="10" fill="#E2E8F0"/>
+  <circle cx="24" cy="24" r="6" fill="#0B1220"/>
+  <text x="62" y="30" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" letter-spacing="2">IDENTRA</text>
+</svg>

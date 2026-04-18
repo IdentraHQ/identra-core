@@ -1,256 +1,207 @@
-# Identra — Local-first AI Memory OS Layer
+# Identra Core
 
-Identra is a **local-first AI runtime** that gives persistent identity and memory to all AI interactions. It runs entirely on-device with a layered architecture: **Desktop UI (Tauri) ↔ Brain Service (FastAPI) ↔ Local LLM (Ollama)**.
+Identra Core is a local-first AI assistant runtime that combines a desktop client, a Python brain service, and a local language model stack. The application is designed for persistent user context, encrypted memory storage, and low-latency on-device responses.
 
-## Quick Start
+## Product Overview
 
-### Prerequisites
-- **Rust** 1.70+
-- **Python** 3.10+
-- **Node.js** 18+ (for desktop UI)
-- **pnpm** (package manager)
-- **Ollama** (runs automatically on first launch; see [Setup](#setup) for details)
+Identra provides:
 
-### Setup
+- Real-time chat with token streaming.
+- Persistent memory across sessions.
+- Name and profile recall backed by local storage.
+- Context-aware prompt building from active app and selected text.
+- Local inference through Ollama using qwen2.5 as default.
+- Encrypted memory payloads at rest.
+
+## System Architecture
+
+![Identra System Architecture](docs/images/system-architecture.svg)
+
+### Runtime Flow
+
+![Identra Request and Memory Flow](docs/images/request-flow.svg)
+
+## Core Components
+
+### Desktop Application (Tauri + React)
+
+- Handles user chat interactions and streaming UI updates.
+- Captures runtime context from the active desktop session.
+- Calls Brain service endpoints through local networking.
+
+### Brain Service (FastAPI)
+
+- Serves chat, memory, and readiness endpoints.
+- Retrieves memory candidates and composes grounded prompts.
+- Persists raw chat history and distilled long-term facts.
+- Maintains startup state and service diagnostics.
+
+### Memory Subsystem (ChromaDB + encryption)
+
+- Stores encrypted memory documents in local vector storage.
+- Uses similarity search plus decay-weight ranking.
+- Persists user profile data in local state files.
+
+### Inference Layer (Ollama)
+
+- Runs fully local model inference.
+- Default model: `qwen2.5`.
+- Streams generation output for responsive UX.
+
+## Repository Layout
+
+```
+identra-core/
+├── apps/
+│   └── identra-brain/
+│       ├── src/
+│       │   ├── api/
+│       │   ├── llm/
+│       │   ├── memory/
+│       │   └── setup/
+│       └── requirements.txt
+├── clients/
+│   └── identra-desktop/
+│       ├── src/
+│       └── src-tauri/
+├── libs/
+│   ├── identra-core/
+│   └── identra-crypto/
+├── docs/
+│   └── images/
+├── Justfile
+├── Cargo.toml
+└── .env.example
+```
+
+## Production Prerequisites
+
+- Linux, macOS, or Windows workstation with local resources for LLM inference.
+- Python 3.10+.
+- Node.js 18+ with pnpm.
+- Rust toolchain (stable).
+- Docker or native Ollama installation.
+
+## Installation
+
 ```bash
-# Clone and install dependencies
 git clone https://github.com/IdentraHQ/identra-core.git
 cd identra-core
 just setup
 ```
 
-### Run
-In two separate terminals:
+## Runtime Startup
 
-**Terminal 1** — Start Brain service:
+Run the application stack in separate terminals.
+
+### 1) Start Ollama
+
+If using Docker:
+
+```bash
+docker start ollama || docker run -d --name ollama -p 11434:11434 -v "$HOME/.ollama:/root/.ollama" ollama/ollama
+```
+
+Ensure model availability:
+
+```bash
+docker exec ollama ollama pull qwen2.5
+```
+
+### 2) Start Brain Service
+
 ```bash
 just dev-brain
 ```
 
-**Terminal 2** — Start Desktop app:
+### 3) Start Desktop Application
+
 ```bash
 just dev-desktop
 ```
 
-The desktop app will open. The first launch will check for Ollama and pull models (~5–15 min depending on bandwidth).
-
----
-
-## Architecture Overview
-
-```
-┌─────────────────────────────────────────┐
-│   Desktop UI (Tauri + React + Vite)     │
-│  - Chat interface                       │
-│  - Context capture (active window)      │
-│  - Setup/status display                 │
-└────────────────┬────────────────────────┘
-                 │ IPC (local JSON-RPC)
-┌────────────────▼────────────────────────┐
-│   Tauri Backend (Rust)                  │
-│  - IPC bridge                           │
-│  - Screener (window/text capture)       │
-│  - Vault (AES-256 encryption)           │
-│  - Setup/watchdog                       │
-└────────────────┬────────────────────────┘
-                 │ HTTP (localhost:8000)
-┌────────────────▼────────────────────────┐
-│   Brain Service (FastAPI)               │
-│  - Chat endpoint (streaming)            │
-│  - Memory engine (retrieve/add)         │
-│  - BackgroundDistiller (async)          │
-│  - ChromaDB (vector memory)             │
-└────────────────┬────────────────────────┘
-                 │ HTTP (localhost:11434)
-┌────────────────▼────────────────────────┐
-│   Ollama (Local LLM Runtime)            │
-│  - Model inference (e.g., llama3)       │
-│  - Running completely offline           │
-└─────────────────────────────────────────┘
-```
-
-### Layer responsibilities
-
-| Layer | Responsibility | Tech |
-|-------|----------------|------|
-| **Desktop UI** | User chat, context display, setup flow | React, TypeScript, Tauri IPC |
-| **Tauri Rust** | System integration, window control, encryption | Rust, Tauri 2 |
-| **Brain Service** | AI reasoning, memory retrieval, distillation | FastAPI, ChromaDB |
-| **Ollama** | Local model inference | Ollama, llama3 (default) |
-
----
-
-## Core Systems
-
-### 1. Chat Flow (Streaming)
-```
-User types prompt
-  ↓
-Tauri IPC → Get current context (app name, selected text)
-  ↓
-POST /chat to Brain service
-  ↓
-Brain retrieves top 3–5 related memories (vector search)
-  ↓
-Builds system prompt with context + memories
-  ↓
-Streams response from Ollama token-by-token
-  ↓
-Render streamed tokens in UI
-  ↓
-POST /chat/record to store interaction for later distillation
-```
-
-### 2. Memory Engine
-- **Insert**: New memories are checked for semantic duplicates (>0.9 similarity → merge with weight boost).
-- **Retrieve**: Cosine similarity + weighted ranking: `score = distance / weight`.
-- **Distillation**: Background worker summarizes chat history every 60 seconds into permanent facts.
-- **Storage**: All memories stored in `~/.identra/chroma_db` (local embeddings via ChromaDB).
-
-### 3. Setup & Watchdog
-- **First launch**: Checks for Ollama, starts daemon, pulls model, marks setup complete.
-- **Watchdog**: Checks Brain service health every 5 seconds; restarts if unhealthy.
-- **State**: Persists setup progress to `~/.identra/state.json`.
-
----
-
 ## Configuration
 
-See [.env.example](.env.example) for all environment variables.
+Copy and adjust environment values:
 
-### Key variables
 ```bash
-# Brain Service (FastAPI)
-BRAIN_HOST=127.0.0.1           # Bind address
-BRAIN_PORT=8000                # Port
-
-# Ollama Integration
-OLLAMA_URL=http://localhost:11434   # Ollama endpoint
-OLLAMA_MODEL=llama3                 # Model to use
-OLLAMA_TIMEOUT=120                  # Inference timeout (seconds)
+cp .env.example .env
 ```
 
----
+Key parameters:
+
+- `OLLAMA_URL=http://localhost:11434`
+- `OLLAMA_MODEL=qwen2.5`
+- `BRAIN_HOST=127.0.0.1`
+- `BRAIN_PORT=8000`
+- `IDENTRA_USER_NAME=`
+
+## API Endpoints
+
+### Health and readiness
+
+- `GET /health`
+- `GET /ready`
+
+### Chat and memory
+
+- `POST /chat`
+- `POST /chat/record`
+- `POST /memory/add`
+- `POST /memory/retrieve`
+
+### Diagnostics
+
+- `GET /debug/logs`
+
+## Persistence and Data Paths
+
+Runtime data is persisted under `~/.identra`:
+
+- `~/.identra/chroma_db` for vector memory.
+- `~/.identra/profile.json` for profile metadata.
+- `~/.identra/state.json` for setup/runtime state.
+- `~/.identra/logs` for service logs.
+
+## Security Model
+
+- Memory records are encrypted before persistence.
+- Keys are generated and stored locally on first run.
+- No mandatory cloud dependency for inference or storage.
+
+## Operational Validation
+
+Use these checks in production bring-up and incident response:
+
+```bash
+curl -s http://127.0.0.1:11434/api/tags
+curl -s http://127.0.0.1:8000/health
+curl -s http://127.0.0.1:8000/ready
+```
 
 ## Troubleshooting
 
-### Brain service won't start
+### Brain service unavailable
+
 ```bash
-# Check if port 8000 is in use
 lsof -i :8000
-
-# Kill blocking process
-kill -9 <PID>
-
-# Check logs
 cat ~/.identra/logs/brain.log
 ```
 
-### Ollama not starting
+### Ollama not reachable
+
 ```bash
-# Check if Ollama is installed
-which ollama
-
-# Manual start
-ollama serve
-
-# Check model availability
-ollama list
+docker ps | grep ollama
+curl -s http://127.0.0.1:11434/api/tags
 ```
 
-### Can't connect to Brain from Desktop
-```bash
-# Check Brain health
-curl http://127.0.0.1:8000/health
-# Should return: {"status": "ok", "service": "identra-brain"}
+### Memory does not appear in responses
 
-# Check firewall
-netstat -an | grep 8000
-```
-
-### Memory not persisting
 ```bash
-# Check ChromaDB directory
+curl -s http://127.0.0.1:8000/ready
 ls -la ~/.identra/chroma_db
-
-# Clear and restart (WARNING: clears memory)
-rm -rf ~/.identra/chroma_db
-# Restart Brain service
 ```
-
----
-
-## File Structure
-
-```
-identra-core/
-├── README.md                  # This file
-├── architecture.md            # Detailed design decisions
-├── agent.md                   # Coding guidelines (contributors)
-├── implementation.md          # Implementation roadmap (not tracked)
-│
-├── Justfile                   # Build & run commands
-├── Cargo.toml                 # Rust workspace config
-├── .env.example               # Environment template
-│
-├── apps/
-│   └── identra-brain/         # Brain FastAPI service
-│       ├── requirements.txt   # Python dependencies
-│       └── src/
-│           ├── main.py        # FastAPI app
-│           ├── api/           # REST endpoints
-│           ├── llm/           # Ollama client
-│           └── memory/        # Engine + distiller
-│
-├── clients/
-│   └── identra-desktop/       # Desktop app (Tauri+React)
-│       ├── src/               # React components
-│       ├── src-tauri/         # Rust backend
-│       │   ├── src/           # Tauri commands
-│       │   │   ├── ipc/       # IPC bridge
-│       │   │   ├── screener/  # Context capture
-│       │   │   ├── vault/     # Encryption
-│       │   │   ├── setup/     # Setup orchestration
-│       │   │   └── window/    # Window control
-│       │   └── tauri.conf.json
-│       └── package.json
-│
-├── libs/
-│   ├── identra-core/          # Shared Rust primitives
-│   └── identra-crypto/        # AES-256 vault
-│
-└── landing/                   # Landing page (managed by Sarthak)
-```
-
----
-
-## Development
-
-### Adding a new Brain endpoint
-1. Add route in `apps/identra-brain/src/api/routers.py`
-2. Import and test locally
-3. Update Tauri IPC client if needed
-
-### Adding a new Tauri command
-1. Implement in `clients/identra-desktop/src-tauri/src/` (e.g., `clients/identra-desktop/src-tauri/src/ipc/mod.rs`)
-2. Register in `invoke_handler` in `clients/identra-desktop/src-tauri/src/lib.rs`
-3. Call from React via `invoke("command_name", {...})`
-
-### Modifying memory system
-- Memory engine: `apps/identra-brain/src/memory/engine.py`
-- Distiller logic: `apps/identra-brain/src/memory/distiller.py`
-- Always test similarity dedup and ranking before commit.
-
----
-
-## Notes & Scope
-
-- **Landing page** (`landing/`) is managed separately by Sarthak—not covered in this roadmap.
-- Local-first means no telemetry or external API calls (Ollama can be self-hosted).
-- All data at rest (memory, encryption keys) is stored in `~/.identra/`.
-
----
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+This project is licensed under the terms in [LICENSE](LICENSE).

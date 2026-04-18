@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.routers import router, memory_engine, llm_client
 from src.memory.distiller import MemoryDistiller
 from src.setup import StateManager
+from src.setup.profile import UserProfileManager
 
 log_dir = os.path.expanduser("~/.identra/logs")
 os.makedirs(log_dir, exist_ok=True)
@@ -22,6 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger("brain")
 
 state_manager = StateManager()
+profile_manager = UserProfileManager()
 distiller = MemoryDistiller(memory_engine, llm_client)
 
 @asynccontextmanager
@@ -32,6 +34,8 @@ async def lifespan(app: FastAPI):
     state_manager.set_brain_ready(False)
     
     try:
+        llm_client.user_name = profile_manager.get_name()
+
         # Start distiller background task
         distiller_task = asyncio.create_task(distiller.start())
         

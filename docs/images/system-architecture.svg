@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1324"/>
+      <stop offset="100%" stop-color="#111d35"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#192a4a"/>
+      <stop offset="100%" stop-color="#1f365f"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 z" fill="#88a4d8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="760" fill="url(#bg)"/>
+  <text x="640" y="56" text-anchor="middle" fill="#e8f0ff" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Identra System Architecture</text>
+  <text x="640" y="86" text-anchor="middle" fill="#b7c7e6" font-family="Segoe UI, Arial, sans-serif" font-size="16">Local-first AI assistant runtime with persistent memory and encrypted storage</text>
+
+  <rect x="80" y="130" rx="16" ry="16" width="1120" height="560" fill="none" stroke="#2f4d83" stroke-width="2"/>
+
+  <rect x="140" y="190" rx="14" ry="14" width="260" height="220" fill="url(#card)" stroke="#4b6ea8" stroke-width="2"/>
+  <text x="270" y="228" text-anchor="middle" fill="#f0f6ff" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Desktop Client</text>
+  <text x="270" y="256" text-anchor="middle" fill="#c8d7f2" font-family="Segoe UI, Arial, sans-serif" font-size="15">Tauri + React</text>
+  <text x="160" y="292" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Chat interface</text>
+  <text x="160" y="316" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Context capture</text>
+  <text x="160" y="340" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Streaming response render</text>
+  <text x="160" y="364" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Local-only interaction</text>
+
+  <rect x="510" y="190" rx="14" ry="14" width="260" height="220" fill="url(#card)" stroke="#4b6ea8" stroke-width="2"/>
+  <text x="640" y="228" text-anchor="middle" fill="#f0f6ff" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Brain Service</text>
+  <text x="640" y="256" text-anchor="middle" fill="#c8d7f2" font-family="Segoe UI, Arial, sans-serif" font-size="15">FastAPI</text>
+  <text x="530" y="292" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• /chat SSE endpoint</text>
+  <text x="530" y="316" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Prompt orchestration</text>
+  <text x="530" y="340" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Memory retrieval + ranking</text>
+  <text x="530" y="364" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Distillation pipeline</text>
+
+  <rect x="880" y="190" rx="14" ry="14" width="260" height="220" fill="url(#card)" stroke="#4b6ea8" stroke-width="2"/>
+  <text x="1010" y="228" text-anchor="middle" fill="#f0f6ff" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Local LLM</text>
+  <text x="1010" y="256" text-anchor="middle" fill="#c8d7f2" font-family="Segoe UI, Arial, sans-serif" font-size="15">Ollama</text>
+  <text x="900" y="292" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• qwen2.5 inference</text>
+  <text x="900" y="316" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Token streaming</text>
+  <text x="900" y="340" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Local execution</text>
+
+  <rect x="260" y="470" rx="14" ry="14" width="330" height="160" fill="url(#card)" stroke="#4b6ea8" stroke-width="2"/>
+  <text x="425" y="506" text-anchor="middle" fill="#f0f6ff" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Memory Layer</text>
+  <text x="280" y="536" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• ChromaDB persistent vectors</text>
+  <text x="280" y="560" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Decay + retention logic</text>
+  <text x="280" y="584" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Distilled long-term facts</text>
+
+  <rect x="690" y="470" rx="14" ry="14" width="330" height="160" fill="url(#card)" stroke="#4b6ea8" stroke-width="2"/>
+  <text x="855" y="506" text-anchor="middle" fill="#f0f6ff" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">Security Layer</text>
+  <text x="710" y="536" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• AES-GCM at-rest encryption</text>
+  <text x="710" y="560" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• Local key material</text>
+  <text x="710" y="584" fill="#d7e4fa" font-family="Segoe UI, Arial, sans-serif" font-size="14">• No cloud persistence</text>
+
+  <line x1="400" y1="300" x2="510" y2="300" stroke="#88a4d8" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="770" y1="300" x2="880" y2="300" stroke="#88a4d8" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="640" y1="410" x2="640" y2="470" stroke="#88a4d8" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="770" y1="410" x2="855" y2="470" stroke="#88a4d8" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="454" y="284" text-anchor="middle" fill="#b7c7e6" font-family="Segoe UI, Arial, sans-serif" font-size="12">IPC + HTTP</text>
+  <text x="824" y="284" text-anchor="middle" fill="#b7c7e6" font-family="Segoe UI, Arial, sans-serif" font-size="12">HTTP /api/generate</text>
+</svg>
