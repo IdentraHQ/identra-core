@@ -11,6 +11,15 @@ class OllamaClient:
         self.model = os.getenv("OLLAMA_MODEL", "llama3")
         self.client = httpx.AsyncClient(timeout=60.0)
         
+    async def check_health(self) -> bool:
+        """Check if Ollama service is reachable and responsive."""
+        try:
+            response = await self.client.get(f"{self.base_url}/api/tags", timeout=5.0)
+            return response.status_code == 200
+        except Exception as e:
+            logger.warning(f"Ollama health check failed: {e}")
+            return False
+        
     async def stream_chat(self, prompt: str, system_prompt: str = ""):
         url = f"{self.base_url}/api/generate"
         payload = {

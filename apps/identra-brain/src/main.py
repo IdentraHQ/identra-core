@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.routers import router, memory_engine, llm_client
 from src.memory.distiller import MemoryDistiller
+from src.setup import StateManager
 
 log_dir = os.path.expanduser("~/.identra/logs")
 os.makedirs(log_dir, exist_ok=True)
@@ -20,16 +21,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger("brain")
 
+state_manager = StateManager()
 distiller = MemoryDistiller(memory_engine, llm_client)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Identra Brain Service is starting up...")
-    distiller_task = asyncio.create_task(distiller.start())
-    yield
-    logger.info("Identra Brain Service is shutting down...")
-    await distiller.stop()
-    distiller_task.cancel()
+    
+    # Mark brain as starting
+    state_manager.set_brain_ready(False)
+    
+    try:
+        # Start distiller background task
+        distiller_task = asyncio.create_task(distiller.start())
+        
+        # Verify memory engine is ready
+        memory_count = memory_engine.get_collection_count()
+        logger.info(f"Memory engine ready with {memory_count} existing memories")
+        
+        # Verify Ollama is ready
+        ollama_ok = await llm_client.check_health()
+        if ollama_ok:
+            logger.info("Ollama client verified")
+            state_manager.set_ollama_checked(True)
+            state_manager.set_models_ready(True)
+        else:
+            logger.warning("Ollama is not responding - service will operate in degraded mode")
+        
+        # Mark brain as ready
+        state_manager.set_brain_ready(True)
+        state_manager.set_setup_complete(True)
+        logger.info("Identra Brain Service is ready")
+        
+        yield
+        
+    finally:
+        logger.info("Identra Brain Service is shutting down...")
+        await distiller.stop()
+        distiller_task.cancel()
+        state_manager.set_brain_ready(False)
 
 app = FastAPI(title="Identra Brain", lifespan=lifespan)
 

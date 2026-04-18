@@ -2272,6 +2272,7 @@ dependencies = [
  "active-win-pos-rs",
  "arboard",
  "base64 0.22.1",
+ "chrono",
  "enigo",
  "identra-core",
  "identra-crypto",

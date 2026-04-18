@@ -1,116 +1,503 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
-}
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
+* {
   margin: 0;
-  padding-top: 10vh;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+.chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
+  height: 100vh;
+  background: white;
   color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
-button {
-  cursor: pointer;
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #ffffff;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+.chat-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #646cff 0%, #24c8db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-input,
-button {
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fbbf24;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.ready {
+  background: #10b981;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #999;
+}
+
+.chat-empty p {
+  font-size: 18px;
+  margin: 8px 0;
+}
+
+.chat-empty .subtitle {
+  font-size: 14px;
+  color: #bbb;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-user {
+  justify-content: flex-end;
+}
+
+.message-assistant {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.message-user .message-content {
+  background: #646cff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-assistant .message-content {
+  background: #f0f0f0;
+  color: #0f0f0f;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-context {
+  padding: 12px 20px;
+  background: #fafafa;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  overflow-x: auto;
+  max-height: 50px;
+}
+
+.context-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.context-label {
+  color: #999;
+  font-weight: 600;
+}
+
+.context-value {
+  color: #666;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-input-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid #e5e5e5;
+  background: white;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
   outline: none;
+  transition: border-color 0.2s;
+  background: white;
+  color: #0f0f0f;
 }
 
-#greet-input {
-  margin-right: 5px;
+.chat-input:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.chat-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.chat-submit {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #646cff 0%, #24c8db 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 14px;
+}
+
+.chat-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.chat-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.chat-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scrollbar styling */
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chat-container {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  .chat-header {
+    border-bottom-color: #333;
+    background: #1e1e1e;
+  }
+
+  .chat-messages {
+    background: #1e1e1e;
+  }
+
+  .message-assistant .message-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+
+  .chat-context {
+    background: #252525;
+    border-top-color: #333;
+  }
+
+  .context-label {
+    color: #888;
+  }
+
+  .context-value {
+    color: #aaa;
+  }
+
+  .chat-input-form {
+    border-top-color: #333;
+    background: #1e1e1e;
+  }
+
+  .chat-input {
+    border-color: #444;
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+
+  .chat-input:focus {
+    border-color: #646cff;
+    box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+  }
+
+  .chat-input:disabled {
+    background: #252525;
+    color: #666;
+  }
+
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: #444;
+  }
+
+  .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+/* New header layout */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Debug toggle button */
+.debug-toggle {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ddd;
+  background: #f5f5f5;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.debug-toggle:hover:not(:disabled) {
+  background: #e5e5e5;
+  color: #646cff;
+  border-color: #bbb;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
+  .debug-toggle {
+    border-color: #444;
+    background: #2d2d2d;
+    color: #aaa;
   }
 
-  a:hover {
-    color: #24c8db;
+  .debug-toggle:hover:not(:disabled) {
+    background: #3a3a3a;
+    color: #646cff;
+    border-color: #555;
+  }
+}
+
+/* Chat main layout with debug */
+.chat-main {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+/* Debug panel */
+.debug-panel {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e5e5e5;
+  background: #fafafa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.debug-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f5f5f5;
+}
+
+.debug-logs {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  font-family: "Monaco", "Courier New", monospace;
+}
+
+.debug-logs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.debug-logs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.debug-logs::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.debug-empty {
+  padding: 16px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}
+
+.debug-log {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  gap: 8px;
+  color: #666;
+}
+
+.debug-time {
+  color: #999;
+  flex-shrink: 0;
+  opacity: 0.7;
+  min-width: 90px;
+}
+
+.debug-level {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+.debug-log.debug-info .debug-level {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.debug-log.debug-warning .debug-level {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.debug-log.debug-error .debug-level {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.debug-log.debug-debug .debug-level {
+  background: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+}
+
+.debug-msg {
+  flex: 1;
+  word-break: break-all;
+  color: #0f0f0f;
+}
+
+/* Dark mode for debug panel */
+@media (prefers-color-scheme: dark) {
+  .debug-panel {
+    border-left-color: #333;
+    background: #252525;
   }
 
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
+  .debug-header {
+    border-bottom-color: #333;
+    background: #1e1e1e;
+    color: #888;
   }
-  button:active {
-    background-color: #0f0f0f69;
+
+  .debug-logs {
+    background: #1e1e1e;
+  }
+
+  .debug-logs::-webkit-scrollbar-thumb {
+    background: #444;
+  }
+
+  .debug-log {
+    border-bottom-color: #2d2d2d;
+    color: #aaa;
+  }
+
+  .debug-time {
+    color: #888;
+  }
+
+  .debug-msg {
+    color: #e0e0e0;
+  }
+
+  .debug-empty {
+    color: #888;
   }
 }

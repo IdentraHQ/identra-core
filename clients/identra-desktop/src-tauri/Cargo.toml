@@ -26,6 +26,7 @@ identra-core = { path = "../../../libs/identra-core" }
 identra-crypto = { path = "../../../libs/identra-crypto" }
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1.43", features = ["time"] }
+chrono = "0.4"
 base64 = "0.22"
 active-win-pos-rs = "0.10.0"
 enigo = "0.6.1"

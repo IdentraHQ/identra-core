@@ -22,6 +22,28 @@ pub fn get_current_context() -> ContextPayload {
     }
 }
 
+#[tauri::command]
+pub async fn record_interaction(user_prompt: String, assistant_response: String) -> Result<(), String> {
+    println!("[ipc] recording interaction with brain service");
+    
+    // Forward to Brain service for memory distillation
+    let client = reqwest::Client::new();
+    let result = client
+        .post("http://127.0.0.1:8000/chat/record")
+        .json(&serde_json::json!({
+            "user_prompt": user_prompt,
+            "assistant_response": assistant_response
+        }))
+        .send()
+        .await;
+    
+    match result {
+        Ok(resp) if resp.status().is_success() => Ok(()),
+        Ok(resp) => Err(format!("Brain service returned {}", resp.status())),
+        Err(e) => Err(format!("Failed to connect to brain service: {}", e)),
+    }
+}
+
 pub fn init() {
     // Other IPC init if needed
 }

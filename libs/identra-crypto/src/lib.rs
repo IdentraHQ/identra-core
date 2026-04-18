@@ -58,3 +58,74 @@ impl AesVault {
         String::from_utf8(plaintext_bytes).map_err(|_| VaultError::DecryptionFailed)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_vault_creation() {
+        let key = AesVault::generate_key();
+        let vault = AesVault::new(&key);
+        assert!(vault.is_ok());
+    }
+
+    #[test]
+    fn test_bad_key_length() {
+        let bad_key = [0u8; 16]; // Wrong size
+        let vault = AesVault::new(&bad_key);
+        assert!(matches!(vault, Err(VaultError::InvalidKeyLength)));
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_roundtrip() {
+        let key = AesVault::generate_key();
+        let vault = AesVault::new(&key).expect("Vault creation failed");
+        
+        let plaintext = "Secret message";
+        let encrypted = vault.encrypt(plaintext).expect("Encryption failed");
+        let decrypted = vault.decrypt(&encrypted).expect("Decryption failed");
+        
+        assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn test_different_encryptions() {
+        let key = AesVault::generate_key();
+        let vault = AesVault::new(&key).expect("Vault creation failed");
+        
+        let plaintext = "Test";
+        let encrypted1 = vault.encrypt(plaintext).expect("Encryption 1 failed");
+        let encrypted2 = vault.encrypt(plaintext).expect("Encryption 2 failed");
+        
+        // Should be different due to random nonce
+        assert_ne!(encrypted1, encrypted2);
+        
+        // But both should decrypt to the same plaintext
+        assert_eq!(vault.decrypt(&encrypted1).unwrap(), plaintext);
+        assert_eq!(vault.decrypt(&encrypted2).unwrap(), plaintext);
+    }
+
+    #[test]
+    fn test_empty_plaintext() {
+        let key = AesVault::generate_key();
+        let vault = AesVault::new(&key).expect("Vault creation failed");
+        
+        let encrypted = vault.encrypt("").expect("Encryption failed");
+        let decrypted = vault.decrypt(&encrypted).expect("Decryption failed");
+        
+        assert_eq!(decrypted, "");
+    }
+
+    #[test]
+    fn test_large_plaintext() {
+        let key = AesVault::generate_key();
+        let vault = AesVault::new(&key).expect("Vault creation failed");
+        
+        let plaintext = "X".repeat(10000);
+        let encrypted = vault.encrypt(&plaintext).expect("Encryption failed");
+        let decrypted = vault.decrypt(&encrypted).expect("Decryption failed");
+        
+        assert_eq!(decrypted, plaintext);
+    }
+}
