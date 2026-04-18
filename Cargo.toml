@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "clients/identra-desktop/src-tauri",
+  "libs/identra-core",
+  "libs/identra-crypto"
+]
+
+resolver = "2"

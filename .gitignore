@@ -1,0 +1,57 @@
+# Rust / Cargo
+target/
+**/*.rs.bk
+Cargo.lock.bk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+.env
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node / Web (Tauri UI)
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# OS / Environment
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs / Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Identra Specific (Data & Logs)
+chroma/
+chroma_db/
+logs/
+.identra/
+agent.md
