@@ -6,3 +6,6 @@ httpx
 python-dotenv
 pydantic
 pydantic-settings
+cryptography
+pytest
+pytest-asyncio
