@@ -9,7 +9,30 @@ class OllamaClient:
     def __init__(self):
         self.base_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.model = os.getenv("OLLAMA_MODEL", "llama3")
+        self.user_name = os.getenv("IDENTRA_USER_NAME", "").strip()
         self.client = httpx.AsyncClient(timeout=60.0)
+
+    def build_system_prompt(self, prompt: str, memory_context: str = "", active_window: str = "", selected_text: str = "") -> str:
+        user_label = self.user_name or "the user"
+        lines = [
+            f"You are Identra, a local personal assistant for {user_label}.",
+            "Respond in a direct, concise, personalized way.",
+            "Keep answers to 1-3 short sentences unless the user asks for more.",
+            "Avoid filler, preambles, and long explanations.",
+            "Use simple language and answer the question first.",
+            "Prefer one short paragraph or a tiny list only when it improves clarity.",
+            "If something is uncertain, say so briefly and suggest the next step.",
+        ]
+
+        if memory_context:
+            lines.append(f"Relevant past memories:\n{memory_context}")
+        if active_window:
+            lines.append(f"The user is currently looking at application: {active_window}")
+        if selected_text:
+            lines.append(f"The user has highlighted the following text:\n{selected_text}")
+
+        lines.append("Be precise, practical, and short.")
+        return "\n".join(lines)
         
     async def check_health(self) -> bool:
         """Check if Ollama service is reachable and responsive."""
