@@ -16,11 +16,15 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             setup::init(app.handle());
+            vault::init(app.handle());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             greet,
-            ipc::ping
+            ipc::ping,
+            ipc::get_current_context,
+            vault::encrypt_memory,
+            vault::decrypt_memory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
