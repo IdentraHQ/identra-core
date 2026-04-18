@@ -22,6 +22,8 @@ class OllamaClient:
             "Use simple language and answer the question first.",
             "Prefer one short paragraph or a tiny list only when it improves clarity.",
             "If something is uncertain, say so briefly and suggest the next step.",
+            "If the user greets you or says hello, reply warmly and briefly without disclaimers.",
+            "Do not mention internet access or browsing limitations unless the user explicitly asks about browsing or the web.",
         ]
 
         if memory_context:
