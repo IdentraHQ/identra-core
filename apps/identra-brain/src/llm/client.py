@@ -8,7 +8,7 @@ logger = logging.getLogger("brain.llm")
 class OllamaClient:
     def __init__(self):
         self.base_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
-        self.model = os.getenv("OLLAMA_MODEL", "llama3")
+        self.model = os.getenv("OLLAMA_MODEL", "qwen2.5")
         self.user_name = os.getenv("IDENTRA_USER_NAME", "").strip()
         self.client = httpx.AsyncClient(timeout=60.0)
 
